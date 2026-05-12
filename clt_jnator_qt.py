@@ -493,16 +493,19 @@ class MainWindow(QMainWindow):
 
     def save_reminders(self):
         reminders_path = self.get_reminders_path()
+        reminders_path.parent.mkdir(parents=True, exist_ok=True)
         serializable = []
         for reminder in self.reminders:
             stored = dict(reminder)
             due = stored.get("next_due")
             stored["next_due"] = self.format_timestamp(due) if due is not None else ""
             serializable.append(stored)
-        reminders_path.write_text(
+        temporary_path = reminders_path.with_suffix(".tmp")
+        temporary_path.write_text(
             json.dumps(serializable, indent=2, ensure_ascii=False),
             encoding="utf-8",
         )
+        temporary_path.replace(reminders_path)
 
     def normalize_loaded_reminder(self, reminder):
         required_defaults = {
@@ -619,7 +622,11 @@ class MainWindow(QMainWindow):
         reminders_menu = self.menuBar().addMenu("Lembretes")
         new_reminder_action = QAction("Novo lembrete", self)
         new_reminder_action.triggered.connect(self.create_reminder)
+        show_reminders_file_action = QAction("Ver arquivo de lembretes", self)
+        show_reminders_file_action.triggered.connect(self.show_reminders_file_info)
         reminders_menu.addAction(new_reminder_action)
+        reminders_menu.addSeparator()
+        reminders_menu.addAction(show_reminders_file_action)
 
     def build_ui(self):
         self.root_widget = GradientWindow()
@@ -1011,12 +1018,18 @@ class MainWindow(QMainWindow):
         reminder = dialog.reminder
         reminder["next_due"] = self.calculate_initial_reminder_due(reminder)
         self.reminders.append(reminder)
-        self.save_reminders()
+        if not self.try_save_reminders():
+            self.reminders.pop()
+            return
         due_text = self.format_timestamp(reminder["next_due"])
         QMessageBox.information(
             self,
             "Lembrete criado",
-            f'Lembrete "{reminder["name"]}" criado para {due_text}.',
+            (
+                f'Lembrete "{reminder["name"]}" criado para {due_text}.\n\n'
+                f"Salvo em:\n{self.get_reminders_path()}\n\n"
+                f"Total de lembretes salvos: {len(self.reminders)}"
+            ),
         )
 
     def check_reminders(self):
@@ -1033,7 +1046,39 @@ class MainWindow(QMainWindow):
             reminder["last_triggered_minute"] = due_minute
             self.show_reminder(reminder)
             reminder["next_due"] = self.calculate_next_reminder_due(reminder, due)
+            self.try_save_reminders(show_success=False)
+
+    def try_save_reminders(self, show_success=False):
+        try:
             self.save_reminders()
+        except OSError as error:
+            QMessageBox.critical(
+                self,
+                "Erro ao salvar lembretes",
+                f"Nao foi possivel salvar os lembretes em:\n{self.get_reminders_path()}\n\n{error}",
+            )
+            return False
+
+        if show_success:
+            QMessageBox.information(
+                self,
+                "Lembretes salvos",
+                f"Lembretes salvos em:\n{self.get_reminders_path()}",
+            )
+        return True
+
+    def show_reminders_file_info(self):
+        reminders_path = self.get_reminders_path()
+        exists_text = "sim" if reminders_path.exists() else "nao"
+        QMessageBox.information(
+            self,
+            "Arquivo de lembretes",
+            (
+                f"Arquivo:\n{reminders_path}\n\n"
+                f"Existe: {exists_text}\n"
+                f"Lembretes carregados: {len(self.reminders)}"
+            ),
+        )
 
     def show_reminder(self, reminder):
         description = reminder["description"] or "Sem descricao."

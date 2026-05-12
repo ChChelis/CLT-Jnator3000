@@ -1,6 +1,6 @@
 # Memoria do Projeto - CLT-Jnator 3000
 
-## Estado atual - 20260512_00:07:39
+## Estado atual - 20260512_01:10:39
 
 O app agora se chama `CLT-Jnator 3000`. Ele e um timer de tarefas para Windows, abre como uma janela comum, sem terminal, e permite criar tarefas, parar tarefas, continuar tarefas paradas e registrar descricoes obrigatorias quando uma parte de trabalho e encerrada.
 
@@ -23,6 +23,10 @@ Os lembretes agora disparam notificacoes nativas do Windows com som padrao. Se a
 A pasta do projeto foi limpa de imagens antigas e residuos de build. Para distribuir o app de forma simples, basta enviar o conteudo da pasta `dist`.
 
 Os lembretes agora tambem ficam salvos em arquivo JSON ao lado do executavel, permitindo criar lembretes padrao antes de enviar o app para outra pessoa.
+
+O salvamento de lembretes foi reforcado: agora e atomico, mostra erro se falhar e a mensagem de criacao exibe o caminho exato do arquivo `reminders.json` usado pelo app.
+
+Foi criado um atalho na pasta de inicializacao do Windows para abrir o app junto com o sistema.
 
 Cada tarefa pode ter uma ou varias partes. Quando uma tarefa e parada e depois continuada, o app guarda cada periodo separadamente, com inicio e fim em timestamp no formato `YYYYMMDD_HH:mm:ss`.
 
@@ -71,6 +75,7 @@ D:\PROJETOS PYTHON\dist\CLT-Jnator 3000.exe
 - A janela de lembrete reajusta o tamanho conforme o modo e a recorrencia escolhidos.
 - Lembretes disparam notificacoes do Windows com som.
 - Distribuicao simples: enviar `dist\CLT-Jnator 3000.exe`, `dist\ui_settings.json` e `dist\reminders.json`.
+- Neste computador, o app esta configurado para iniciar com o Windows via atalho na pasta Startup.
 - A lista de tarefas preserva a posicao de scroll durante atualizacoes do contador.
 - A sombra dos botoes foi suavizada para cerca de 30% de opacidade.
 - Ao fechar, o app so pede salvamento se ainda nao foi salvo ou se houve mudanca desde o ultimo salvamento.
@@ -453,6 +458,40 @@ D:\PROJETOS PYTHON\reminders.json
 O app carrega esse arquivo ao iniciar, recalcula lembretes vencidos para o proximo horario valido e salva novamente quando um lembrete e criado ou quando um lembrete recorrente dispara.
 
 Isso permite configurar lembretes padrao antes de distribuir o app. Para enviar para outra pessoa, incluir `reminders.json` junto do executavel.
+
+### 28. Persistencia verificavel dos lembretes
+
+Foi reforcado o salvamento dos lembretes para evitar duvida sobre o arquivo usado. A gravacao agora usa arquivo temporario e substituicao atomica, reduzindo risco de JSON parcial.
+
+Ao criar um lembrete, o app mostra:
+
+- data/hora do proximo disparo;
+- caminho exato do `reminders.json`;
+- total de lembretes salvos.
+
+Tambem foi adicionada a acao:
+
+```text
+Lembretes > Ver arquivo de lembretes
+```
+
+Ela mostra o caminho do arquivo, se ele existe e quantos lembretes foram carregados.
+
+### 29. Inicializacao com o Windows
+
+Foi criado um atalho em:
+
+```text
+C:\Users\Chelis\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\CLT-Jnator 3000.lnk
+```
+
+O atalho aponta para:
+
+```text
+D:\PROJETOS PYTHON\dist\CLT-Jnator 3000.exe
+```
+
+Isso faz o app abrir junto com o Windows neste computador. Para outro computador, sera necessario criar um atalho equivalente na pasta Startup daquele usuario ou configurar isso em um instalador futuro.
 
 ## Observacoes tecnicas
 

@@ -1,1 +1,41 @@
-[]
+[
+  {
+    "id": "20260512_010048_627322",
+    "name": "Gaz Games - Planilha Semanal",
+    "description": "Lembrete a todos para enviar a planilha para o administrativo@gazgames.com.br",
+    "mode": "fixed",
+    "timer_minutes": 15,
+    "fixed_time": "17:50",
+    "recurrence": "weekly",
+    "weekday": 4,
+    "month_day": 12,
+    "next_due": "20260515_17:50:00",
+    "last_triggered_minute": ""
+  },
+  {
+    "id": "20260512_010139_695521",
+    "name": "Gaz Games - Planilha Mensal",
+    "description": "Lembrete a todos de enviar a planilha mensal para o administrativo@gazgames.com.br",
+    "mode": "fixed",
+    "timer_minutes": 15,
+    "fixed_time": "17:50",
+    "recurrence": "monthly",
+    "weekday": 1,
+    "month_day": 31,
+    "next_due": "20260531_17:50:00",
+    "last_triggered_minute": ""
+  },
+  {
+    "id": "20260512_010303_735928",
+    "name": "Gaz Games - Almoço",
+    "description": "O horário ideal para o almoço de todos é de 12h às 13h ;)",
+    "mode": "fixed",
+    "timer_minutes": 15,
+    "fixed_time": "11:50",
+    "recurrence": "daily",
+    "weekday": 1,
+    "month_day": 12,
+    "next_due": "20260512_11:50:00",
+    "last_triggered_minute": ""
+  }
+]
